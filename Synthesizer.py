@@ -156,6 +156,11 @@ class display(Frame):
         button6.grid(row=2, column=2)
     def say(self):
         print "Decreased"
+window = Tk()
+window.geometry("{}x{}". format(WIDTH,HEIGHT))
+window.title("SYNTHESIZER")
+display(window)
+window.mainloop()
 # detect when Ctrl+C is pressed so that we can reset the GPIO
 # pins
 try:   
