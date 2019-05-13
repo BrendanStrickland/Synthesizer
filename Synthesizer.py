@@ -3,9 +3,12 @@
 # Date: 5/7/19
 # Description: Music Synthesizer in Python
 ##############################################################
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from time import sleep, time
+from waveform_vis import WaveformVis
 import pygame
+import pygame.midi
+import math
 from array import array
 from Tkinter import *
 
@@ -21,7 +24,7 @@ class Note(pygame.mixer.Sound):
     def __init__(self, frequency, volume):
         self.frequency = frequency
         # initialize the note using an array of samples
-        pygame.mixer.Sound.__init__(self, buffer=self.squarewave())
+        pygame.mixer.Sound.__init__(self, buffer=self.sawtooth())
         self.set_volume(volume)
 
         # Generates square sounds waves
@@ -39,8 +42,52 @@ class Note(pygame.mixer.Sound):
             else:
                 samples[t] = -amplitude
         return samples
+    def sinewave(self):
+        # calculate the period and amplitude of the note's wave
+        period = int(round(MIXER_FREQ / self.frequency))
+        amplitude = 2 ** (abs(MIXER_SIZE) - 1) - 1
+        # initialize the note's samples (using an array of
+        # signed 16-bit "shorts")
+        samples = array("h", [0] * period)
+        # generate the note's samples
+        for t in range(period):
+            p = math.sin(t * self.frequency * (math.radians(2*math.pi)/760) * 1) * amplitude
+            #print(p)
+            samples[t] = int(p)
+        #vis = WaveformVis()
+        #vis.visSamples(samples, "Reverse SawTooth")
+        return samples
+    def triangle(self):
+        # calculate the period and amplitude of the note's wave
+        period = int(round(MIXER_FREQ / self.frequency))
+        amplitude = 2 ** (abs(MIXER_SIZE) - 1) - 1
+        # initialize the note's samples (using an array of
+        # signed 16-bit "shorts")
+        samples = array("h", [0] * period)
+        # generate the note's samples
+        for t in range(period):
+            samples[t] = ((2 * amplitude)/period) * abs((t % period)-(period/2)) - (2*amplitude)/4
+        #vis = WaveformVis()
+        #vis.visSamples(samples, "Triangle")
+        return samples
+    def sawtooth(self):
+        # calculate the period and amplitude of the note's wave
+        period = int(round(MIXER_FREQ / self.frequency))
+        amplitude = 2 ** (abs(MIXER_SIZE) - 1) - 1
+        # initialize the note's samples (using an array of
+        # signed 16-bit "shorts")
+        samples = array("h", [0] * period)
+        # generate the note's samples
+        for t in range(period):
+            if (t < period / 2):
+                samples[t] = int(math.radians(2*math.pi) * 3000 * t)
+               #print amplitude/5
+            else:
+                samples[t] = int(-1*(math.radians(2*math.pi)*3000*(period - t)))
+        #vis = WaveformVis()
+        #vis.visSamples(samples, "Reverse SawTooth")
+        return samples
         
-   
 # waits until a note is pressed
 def wait_for_note_start():
     while (True):
@@ -90,7 +137,7 @@ pygame.mixer.pre_init(MIXER_FREQ, MIXER_SIZE, MIXER_CHANS, MIXER_BUFF)
 pygame.init()
 
 # use the Broadcom pin mode
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BCM)
 
 # setup the pins and frequencies for the notes (C, E, G, B)
 keys = [ 20, 16, 12, 26 ]
@@ -106,14 +153,14 @@ green = 18
 blue = 17 # if red is too dim, use blue
 
 # setup the input pins
-GPIO.setup(keys, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(play, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(record, GPIO.IN, GPIO.PUD_DOWN)
+#GPIO.setup(keys, GPIO.IN, GPIO.PUD_DOWN)
+#GPIO.setup(play, GPIO.IN, GPIO.PUD_DOWN)
+#GPIO.setup(record, GPIO.IN, GPIO.PUD_DOWN)
 
 # setup the output pins
-GPIO.setup(red, GPIO.OUT)
-GPIO.setup(green, GPIO.OUT)
-GPIO.setup(blue, GPIO.OUT)
+#GPIO.setup(red, GPIO.OUT)
+#GPIO.setup(green, GPIO.OUT)
+#GPIO.setup(blue, GPIO.OUT)
 
 
 # create the actual notes
