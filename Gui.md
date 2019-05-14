@@ -3,6 +3,7 @@ from Tkinter import *
 class display(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+        # allows the GUI to expand with the window
         Grid.rowconfigure(window, 5, weight=1)
         Grid.columnconfigure(window, 0, weight=1)
         # setting up the Bass labal
