@@ -199,33 +199,47 @@ print "Press Ctrl+C to exit..."
 class display(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
+        # allows the GUI to expand with the window
+        Grid.rowconfigure(window, 5, weight=1)
+        Grid.columnconfigure(window, 0, weight=1)
+        # sets up the "Bass" label
         label1 = Label(window, text="BASS", fg="blue")
         label1.grid(row=0, column=0)
+        # sets up the "increase bass" button
         button1 = Button(master, text="increase", command=self.bass_up)
         button1.grid(row=0, column=1)
         button1.config(height = 5, width = 15)
+        # sets up the "decrease bass" button
         button2 = Button(master, text="decrease", command=self.bass_down)
         button2.grid(row=0, column=2)
         button2.config(height = 5, width = 15)
+        # sets up the "Pitch" label
         label2 = Label(window, text="PITCH", fg="green")
         label2.grid(row=1, column=0)
+        # sets up the "increase pitch" button
         button3 = Button(master, text="increase", command=self.pitch_up)
         button3.grid(row=1, column=1)
         button3.config(height = 5, width = 15)
+        # sets up the "decrease pitch" button
         button4 = Button(master, text="decrease", command=self.pitch_down)
         button4.grid(row=1, column=2)
         button4.config(height = 5, width = 15)
+        # sets up the "reverb" button
         label3 = Label(window, text="REVERB", fg="red")
         label3.grid(row=2, column=0)
+        # sets up the "increase reverb" button
         button5 = Button(master, text="increase", command=self.frequency_up)
         button5.grid(row=2, column=1)
         button5.config(height=5, width=15)
+        # sets up the "decrease reverb" button
         button6 = Button(master, text="decrease", command=self.frequency_down)
         button6.grid(row=2, column=2)
         button6.config(height=5, width=15)
+        # sets up the "squarewave" button
         button7 = Button(master, text="SquareWave", command=self.square)
         button7.grid(row=0, column=3)
         button7.config(height=5,width=15)
+        # sets up the "confirm" button
         ConfirmButton = Button(master, text="CONFIRM", command=self.confirmation)
         ConfirmButton.grid(row=3, column=0, columnspan=3, rowspan=3, sticky=N+S+E+W)
         ConfirmButton.config(height = 3)
