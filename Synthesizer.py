@@ -147,20 +147,32 @@ notes = []
 # setup the button pins
 play = 19
 record = 21
+# setup the GUI button
+button = 4
 # setup the LED pins
 red = 27
 green = 18
 blue = 17 # if red is too dim, use blue
 
+azul = 25
+verde = 24
+rojo = 23 
+yellow = 22
+
 # setup the input pins
-#GPIO.setup(keys, GPIO.IN, GPIO.PUD_DOWN)
-#GPIO.setup(play, GPIO.IN, GPIO.PUD_DOWN)
-#GPIO.setup(record, GPIO.IN, GPIO.PUD_DOWN)
+GPIO.setup(keys, GPIO.IN, GPIO.PUD_DOWN)
+GPIO.setup(play, GPIO.IN, GPIO.PUD_DOWN)
+GPIO.setup(record, GPIO.IN, GPIO.PUD_DOWN)
+GPIO.setup(button, GPIO.IN, GPIO.PUD_DOWN)
 
 # setup the output pins
-#GPIO.setup(red, GPIO.OUT)
-#GPIO.setup(green, GPIO.OUT)
-#GPIO.setup(blue, GPIO.OUT)
+GPIO.setup(red, GPIO.OUT)
+GPIO.setup(green, GPIO.OUT)
+GPIO.setup(blue, GPIO.OUT)
+GPIO.setup(azul, GPIO.OUT)
+GPIO.setup(verde, GPIO.OUT)
+GPIO.setup(rojo, GPIO.OUT)
+GPIO.setup(yellow, GPIO.OUT)
 
 
 # create the actual notes
@@ -176,38 +188,81 @@ song = []
 print "Welcome to the Pyhton Synthesizer!"
 print "Press Ctrl+C to exit..."
 
-
     
-WIDTH = 600
-HEIGHT = 600
 class display(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
-        label1 = Label(window, text="BASS")
+        label1 = Label(window, text="BASS", fg="blue")
         label1.grid(row=0, column=0)
-        button1 = Button(master, text="increase", fg="red")
+        button1 = Button(master, text="increase", command=self.bass_up)
         button1.grid(row=0, column=1)
-        button2 = Button(master, text="decrease", command=self.say)
+        button1.config(height = 5, width = 15)
+        button2 = Button(master, text="decrease", command=self.bass_down)
         button2.grid(row=0, column=2)
-        label2 = Label(window, text="FREQ")
+        button2.config(height = 5, width = 15)
+        label2 = Label(window, text="PITCH", fg="green")
         label2.grid(row=1, column=0)
-        button3 = Button(master, text="increase")
+        button3 = Button(master, text="increase", command=self.pitch_up)
         button3.grid(row=1, column=1)
-        button4 = Button(master, text="decrease", fg = "red")
+        button3.config(height = 5, width = 15)
+        button4 = Button(master, text="decrease", command=self.pitch_down)
         button4.grid(row=1, column=2)
-        label3 = Label(window, text="PITCH")
+        button4.config(height = 5, width = 15)
+        label3 = Label(window, text="REVERB", fg="red")
         label3.grid(row=2, column=0)
-        button5 = Button(master, text="increase", fg="red")
+        button5 = Button(master, text="increase", command=self.frequency_up)
         button5.grid(row=2, column=1)
-        button6 = Button(master, text="decrease", command=self.say)
+        button5.config(height=5, width=15)
+        button6 = Button(master, text="decrease", command=self.frequency_down)
         button6.grid(row=2, column=2)
-    def say(self):
-        print "Decreased"
+        button6.config(height=5, width=15)
+        ConfirmButton = Button(master, text="CONFIRM", command=self.confirmation)
+        ConfirmButton.grid(row=3, column=0, columnspan=3, rowspan=3, sticky=N+S+E+W)
+        ConfirmButton.config(height = 3)
+    def bass_up(self):
+        GPIO.output(azul, True)
+        sleep(0.5)
+        GPIO.output(azul, False)
+    def bass_down(self):
+        GPIO.output(azul, True)
+        sleep(0.5)
+        GPIO.output(azul, False)
+    def pitch_up(self):
+        GPIO.output(verde, True)
+        sleep(0.5)
+        GPIO.output(verde, False)
+    def pitch_down(self):
+        GPIO.output(verde, True)
+        sleep(0.5)
+        GPIO.output(verde, False)
+    def frequency_up(self):
+        GPIO.output(rojo, True)
+        sleep(0.5)
+        GPIO.output(rojo, False)
+    def frequency_down(self):
+        GPIO.output(rojo, True)
+        sleep(0.5)
+        GPIO.output(rojo, False)
+    def confirmation(self):
+        GPIO.output(yellow, True)
+        sleep(0.5)
+        GPIO.output(yellow, False)
+        window.destroy()
+    def open_close_window():
+        button = 4
+        if(button == True):
+            display(window)
+            window.mainloop
+        else:
+            window.destroy
+        
+
 window = Tk()
-window.geometry("{}x{}". format(WIDTH,HEIGHT))
+window.geometry("350x330")
 window.title("SYNTHESIZER")
 display(window)
 window.mainloop()
+
 # detect when Ctrl+C is pressed so that we can reset the GPIO
 # pins
 try:   
@@ -256,6 +311,7 @@ try:
 except KeyboardInterrupt:
     # reset the GPIO pins
     GPIO.cleanup()
+
 
 
 
