@@ -17,14 +17,21 @@ MIXER_FREQ = 44100
 MIXER_SIZE = -16
 MIXER_CHANS = 1
 MIXER_BUFF = 1024
-
+waveType = 2
 # the note generator class
 class Note(pygame.mixer.Sound):
     # note that volume ranges from 0.0 to 1.0
     def __init__(self, frequency, volume):
         self.frequency = frequency
         # initialize the note using an array of samples
-        pygame.mixer.Sound.__init__(self, buffer=self.sawtooth())
+        if(waveType == 0):
+            pygame.mixer.Sound.__init__(self, buffer=self.squarewave())
+        elif(waveType == 1):
+            pygame.mixer.Sound.__init__(self, buffer=self.sinewave())
+        elif(waveType == 2):
+            pygame.mixer.Sound.__init__(self, buffer=self.triangle())
+        else:
+            pygame.mixer.Sound.__init__(self, buffer=self.sawtooth())
         self.set_volume(volume)
 
         # Generates square sounds waves
@@ -216,9 +223,14 @@ class display(Frame):
         button6 = Button(master, text="decrease", command=self.frequency_down)
         button6.grid(row=2, column=2)
         button6.config(height=5, width=15)
+        button7 = Button(master, text="SquareWave", command=self.square)
+        button7.grid(row=0, column=3)
+        button7.config(height=5,width=15)
         ConfirmButton = Button(master, text="CONFIRM", command=self.confirmation)
         ConfirmButton.grid(row=3, column=0, columnspan=3, rowspan=3, sticky=N+S+E+W)
         ConfirmButton.config(height = 3)
+    def square(self):
+        waveType = 0
     def bass_up(self):
         GPIO.output(azul, True)
         sleep(0.5)
