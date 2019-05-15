@@ -135,14 +135,32 @@ def play_song():
             sleep(duration)
             notes[note].stop()
 
-
+def make_key_mapping(key_list, start_note):
+    """Return a dictionary of (note, velocity) by computer keyboard key code"""
+    
+    mapping = {}
+    for i in range(len(key_list)):
+        mapping[key_list[i]] = (start_note + i, 127)
+    return mapping
 
 # preset mixer initialization arguments: frequency (44.1K), size
 # (16 bits signed), channels (mono), and buffer size (1KB)
 # then, initialize the pygame library
 pygame.mixer.pre_init(MIXER_FREQ, MIXER_SIZE, MIXER_CHANS, MIXER_BUFF)
-pygame.init()
+start_note = 53
+n_notes = 24
+key_mapping = make_key_mapping([K_TAB, K_1, K_q, K_2, K_w, K_3, K_e, K_r,
+                                    K_5, K_t, K_6, K_y, K_u, K_8, K_i, K_9,
+                                    K_o, K_0, K_p, K_LEFTBRACKET, K_EQUALS,
+                                    K_RIGHTBRACKET, K_BACKSPACE, K_BACKSLASH],
+                                   start_note)
+    
 
+
+pygame.init()
+pygame.midi.init()
+midi_out = pygame.midi.Output(0,0)
+i = pygame.midi.Input(1,0)
 # use the Broadcom pin mode
 #GPIO.setmode(GPIO.BCM)
 
@@ -291,8 +309,152 @@ window.mainloop()
 
 # detect when Ctrl+C is pressed so that we can reset the GPIO
 # pins
-try:   
+try:
+    mode = 0
+    pitch = 0
+    instrument = 5
+    midi_out.set_instrument(instrument)
+    on_notes = set()
+    pygame.display.set_mode((600,600))
+    while (1):
+        print(pygame.midi.get_default_input_id())
+        while(mode == 0):
+            print("hey")
+            e = pygame.event.wait()
+            if e.type == pygame.KEYDOWN:
+                print("YES")
+                if e.key == pygame.K_ESCAPE:
+                    break
+                elif e.key == pygame.K_b:
+                    mode = 1
+                elif e.key == pygame.K_j:
+                    if (instrument ==127):
+                        print("LAST INSTRUMENT REACHED")
+                        continue
+                    else:
+                        instrument+= 1
+                    midi_out.set_instrument(instrument)
+                elif e.key == pygame.K_k:
+                    if (instrument == 0):
+                        print("1ST INSTRUMENT REACHED")
+                        continue
+                    else:
+                        instrument-= 1
+                    midi_out.set_instrument(instrument)
+                elif e.key == pygame.K_n:
+                    pitch += 1024
+                    if (pitch < 8191):
+                        midi_out.pitch_bend(pitch,0)
+                    else:
+                        print "TOO HIGH"
+                        pitch-=1024
+                        print(pitch)
+                elif e.key == pygame.K_m:
+                    pitch -= 1024
+                    print(pitch)
+                    if (pitch > -8191):
+                        midi_out.pitch_bend(pitch,0)
+                    else:
+                        print"TOO LOW"
+                        pitch += 1024
+                elif e.key == pygame.K_v:
+                    midi_out.pitch_bend(0,0)
+                try:
+                    note, velocity = key_mapping[e.key]
+                except KeyError:
+                    pass
+                else:
+                    if note not in on_notes:
+                        #keyboard.key_down(note)
+                        midi_out.note_on(note, velocity)
+                        on_notes.add(note)
+            elif e.type == pygame.KEYUP:
+                try:
+                    note, __ = key_mapping[e.key]
+                except KeyError:
+                    pass
+                else:
+                    if note in on_notes:
+                        #keyboard.key_up(note)
+                        midi_out.note_off(note, 0)
+                        on_notes.remove(note)
+            while(mode == 1):
+                #pygame.init()
+                pygame.fastevent.init()
+                event_get = pygame.fastevent.get
+                event_post = pygame.fastevent.post
+
+                #pygame.midi.init()
+                input_id = pygame.midi.get_default_input_id()
+                
+
+                pygame.display.set_mode((1,1))
+
+
+
+                going = True
+                while going:
+                    events = event_get()
+                    for e in events:
+                        if e.type in [QUIT]:
+                            going = False
+                        if e.type in [KEYDOWN]:
+                            if(e.key == pygame.K_b):
+                                going = False
+                                mode = 0
+                            elif e.key == pygame.K_j:
+                                if (instrument ==127):
+                                    print("LAST INSTRUMENT REACHED")
+                                    continue
+                                else:
+                                    instrument+= 1
+                                midi_out.set_instrument(instrument)
+                            elif e.key == pygame.K_k:
+                                if (instrument == 0):
+                                    print("1ST INSTRUMENT REACHED")
+                                    continue
+                                else:
+                                    instrument-= 1
+                                midi_out.set_instrument(instrument)
+                            elif e.key == pygame.K_n:
+                                pitch += 1024
+                                if (pitch < 8191):
+                                    midi_out.pitch_bend(pitch,0)
+                                else:
+                                    print "TOO HIGH"
+                                    pitch-=1024
+                                    print(pitch)
+                            elif e.key == pygame.K_m:
+                                pitch -= 1024
+                                print(pitch)
+                                if (pitch > -8191):
+                                    midi_out.pitch_bend(pitch,0)
+                                else:
+                                    print"TOO LOW"
+                                    pitch += 1024
+                            elif e.key == pygame.K_v:
+                                midi_out.pitch_bend(0,0)
+                        else:
+                            continue
+                        if e.type in [pygame.midi.MIDIIN]:
+                            print (e)
+
+                    if i.poll():
+                        midi_events = i.read(10)
+                        # convert them into pygame events.
+                        midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
+
+                        for m_e in midi_evs:
+                            note = m_e.data1
+                            velocity = m_e.data2
+                            if(velocity) > 0:
+                                midi_out.note_on(note,127)
+                                event_post( m_e )
+                            else:
+                                midi_out.note_off(note,0)
+    """
     while (True):
+    
         # start a timer
         start = time()
         # play a note when pressed...until released (also
@@ -334,6 +496,7 @@ try:
             # if recording, append the note and its duration
             if (recording):
                 song.append([key, duration])
+        """
 except KeyboardInterrupt:
     # reset the GPIO pins
     GPIO.cleanup()
