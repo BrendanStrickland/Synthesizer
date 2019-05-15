@@ -3,6 +3,7 @@
 # Date: 5/7/19
 # Description: Music Synthesizer in Python
 ##############################################################
+
 #import RPi.GPIO as GPIO
 from time import sleep, time
 from waveform_vis import WaveformVis
@@ -18,6 +19,7 @@ MIXER_SIZE = -16
 MIXER_CHANS = 1
 MIXER_BUFF = 1024
 waveType = 2
+
 # the note generator class
 class Note(pygame.mixer.Sound):
     # note that volume ranges from 0.0 to 1.0
@@ -32,9 +34,10 @@ class Note(pygame.mixer.Sound):
             pygame.mixer.Sound.__init__(self, buffer=self.triangle())
         else:
             pygame.mixer.Sound.__init__(self, buffer=self.sawtooth())
+            
         self.set_volume(volume)
 
-        # Generates square sounds waves
+    # Generates square sounds waves
     def squarewave(self):
         # calculate the period and amplitude of the note's wave
         period = int(round(MIXER_FREQ / self.frequency))
@@ -49,6 +52,7 @@ class Note(pygame.mixer.Sound):
             else:
                 samples[t] = -amplitude
         return samples
+
     def sinewave(self):
         # calculate the period and amplitude of the note's wave
         period = int(round(MIXER_FREQ / self.frequency))
@@ -64,6 +68,7 @@ class Note(pygame.mixer.Sound):
         #vis = WaveformVis()
         #vis.visSamples(samples, "Reverse SawTooth")
         return samples
+
     def triangle(self):
         # calculate the period and amplitude of the note's wave
         period = int(round(MIXER_FREQ / self.frequency))
@@ -77,6 +82,7 @@ class Note(pygame.mixer.Sound):
         #vis = WaveformVis()
         #vis.visSamples(samples, "Triangle")
         return samples
+
     def sawtooth(self):
         # calculate the period and amplitude of the note's wave
         period = int(round(MIXER_FREQ / self.frequency))
@@ -94,6 +100,7 @@ class Note(pygame.mixer.Sound):
         #vis = WaveformVis()
         #vis.visSamples(samples, "Reverse SawTooth")
         return samples
+
         
 # waits until a note is pressed
 def wait_for_note_start():
@@ -137,7 +144,6 @@ def play_song():
 
 def make_key_mapping(key_list, start_note):
     """Return a dictionary of (note, velocity) by computer keyboard key code"""
-    
     mapping = {}
     for i in range(len(key_list)):
         mapping[key_list[i]] = (start_note + i, 127)
@@ -155,12 +161,11 @@ key_mapping = make_key_mapping([K_TAB, K_1, K_q, K_2, K_w, K_3, K_e, K_r,
                                     K_RIGHTBRACKET, K_BACKSPACE, K_BACKSLASH],
                                    start_note)
     
-
-
 pygame.init()
 pygame.midi.init()
 midi_out = pygame.midi.Output(0,0)
 i = pygame.midi.Input(1,0)
+
 # use the Broadcom pin mode
 #GPIO.setmode(GPIO.BCM)
 
@@ -199,11 +204,9 @@ GPIO.setup(verde, GPIO.OUT)
 GPIO.setup(rojo, GPIO.OUT)
 GPIO.setup(yellow, GPIO.OUT)
 
-
 # create the actual notes
 for n in range(len(freqs)):
     notes.append(Note(freqs[n], 1))
-
 
 # begin in a non-recording state and initialize the song
 recording = False
@@ -213,54 +216,54 @@ song = []
 print "Welcome to the Pyhton Synthesizer!"
 print "Press Ctrl+C to exit..."
 
-    
+#this class is for the GUI
 class display(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         # allows the GUI to expand with the window
         Grid.rowconfigure(window, 5, weight=1)
         Grid.columnconfigure(window, 0, weight=1)
-        # sets up the "Bass" label
-        label1 = Label(window, text="BASS", fg="blue")
-        label1.grid(row=0, column=0)
-        # sets up the "increase bass" button
-        button1 = Button(master, text="increase", command=self.bass_up)
-        button1.grid(row=0, column=1)
-        button1.config(height = 5, width = 15)
-        # sets up the "decrease bass" button
-        button2 = Button(master, text="decrease", command=self.bass_down)
-        button2.grid(row=0, column=2)
+        # setting up the Bass labal
+        label1 = Label(window, text="Bass", fg="blue", borderwidth=2, relief="solid")
+        label1.grid(row=0, column=0, sticky=N+S+E+W)
+        # setting up the button to increase the bass
+        button1 = Button(master, text="Increase", fg="blue", command=self.bass_up)
+        button1.grid(row=0, column=1, sticky=N+S+E+W)
+        button1.config(height=5, width = 15)
+        # setting up the button to decrease the bass
+        button2 = Button(master, text="Decrease", fg="blue", command=self.bass_down)
+        button2.grid(row=0, column=2, sticky=N+S+E+W)
         button2.config(height = 5, width = 15)
-        # sets up the "Pitch" label
-        label2 = Label(window, text="PITCH", fg="green")
-        label2.grid(row=1, column=0)
-        # sets up the "increase pitch" button
-        button3 = Button(master, text="increase", command=self.pitch_up)
-        button3.grid(row=1, column=1)
+        # setting up the Pitch label
+        label2 = Label(window, text="Pitch", fg="green", borderwidth=2, relief="solid")
+        label2.grid(row=1, column=0, sticky=N+S+E+W)
+        # setting up the button to increase pitch
+        button3 = Button(master, text="Increase", fg="green", command=self.pitch_up)
+        button3.grid(row=1, column=1, sticky=N+S+E+W)
         button3.config(height = 5, width = 15)
-        # sets up the "decrease pitch" button
-        button4 = Button(master, text="decrease", command=self.pitch_down)
-        button4.grid(row=1, column=2)
+        # setting up the button to decrease pitch
+        button4 = Button(master, text="Decrease", fg="green", command=self.pitch_down)
+        button4.grid(row=1, column=2, sticky=N+S+E+W)
         button4.config(height = 5, width = 15)
-        # sets up the "reverb" button
-        label3 = Label(window, text="REVERB", fg="red")
-        label3.grid(row=2, column=0)
-        # sets up the "increase reverb" button
-        button5 = Button(master, text="increase", command=self.frequency_up)
-        button5.grid(row=2, column=1)
+        # setting up the Frequency label
+        label3 = Label(window, text="Frequency", fg="red", borderwidth=2, relief="solid")
+        label3.grid(row=2, column=0, sticky=N+S+E+W)
+        # setting up the button to increase frequency
+        button5 = Button(master, text="Increase", fg="red", command=self.frequency_up)
+        button5.grid(row=2, column=1, sticky=N+S+E+W)
         button5.config(height=5, width=15)
-        # sets up the "decrease reverb" button
-        button6 = Button(master, text="decrease", command=self.frequency_down)
-        button6.grid(row=2, column=2)
+        # setting up the button to decrease frequency
+        button6 = Button(master, text="Decrease", fg="red", command=self.frequency_down)
+        button6.grid(row=2, column=2, sticky=N+S+E+W)
         button6.config(height=5, width=15)
         # sets up the "squarewave" button
         button7 = Button(master, text="SquareWave", command=self.square)
         button7.grid(row=0, column=3)
         button7.config(height=5,width=15)
-        # sets up the "confirm" button
-        ConfirmButton = Button(master, text="CONFIRM", command=self.confirmation)
+        # setting up the button to confirm the changes
+        ConfirmButton = Button(master, text="CONFIRM", font=5, command=self.confirmation)
         ConfirmButton.grid(row=3, column=0, columnspan=3, rowspan=3, sticky=N+S+E+W)
-        ConfirmButton.config(height = 3)
+        ConfirmButton.config(height = 5)
     def square(self):
         waveType = 0
     def bass_up(self):
@@ -296,10 +299,9 @@ class display(Frame):
         button = 4
         if(button == True):
             display(window)
-            window.mainloop
+            window.mainloop()
         else:
-            window.destroy
-        
+            window.destroy()
 
 window = Tk()
 window.geometry("350x330")
@@ -387,10 +389,7 @@ try:
                 #pygame.midi.init()
                 input_id = pygame.midi.get_default_input_id()
                 
-
                 pygame.display.set_mode((1,1))
-
-
 
                 going = True
                 while going:
@@ -452,9 +451,7 @@ try:
                                 event_post( m_e )
                             else:
                                 midi_out.note_off(note,0)
-    """
     while (True):
-    
         # start a timer
         start = time()
         # play a note when pressed...until released (also
@@ -496,13 +493,7 @@ try:
             # if recording, append the note and its duration
             if (recording):
                 song.append([key, duration])
-        """
+                
 except KeyboardInterrupt:
     # reset the GPIO pins
     GPIO.cleanup()
-
-
-
-
-
-
