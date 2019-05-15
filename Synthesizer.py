@@ -9,6 +9,7 @@ from time import sleep, time
 from waveform_vis import WaveformVis
 import pygame
 import pygame.midi
+from pygame.locals import *
 import math
 from array import array
 from Tkinter import *
